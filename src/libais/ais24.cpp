@@ -11,7 +11,7 @@ Ais24::Ais24(const char *nmea_payload, const size_t pad)
 
   assert(message_id == 24);
 
-  if (num_bits != 160 && num_bits != 168) {
+  if (num_bits < 160 || num_bits > 168) {
     status = AIS_ERR_BAD_BIT_COUNT;
     return;
   }
@@ -25,22 +25,21 @@ Ais24::Ais24(const char *nmea_payload, const size_t pad)
 
   bs.SeekTo(38);
   part_num = bs.ToUnsignedInt(38, 2);
+  
+  if(part_num == 1 && num_bits < 168) {
+    // Some devices incorrectly use part 1 as 0.
+    part_num = 0;
+  }
 
   switch (part_num) {
   case 0:  // Part A
     name = bs.ToString(40, 120);
-    if (num_bits == 168) {
+    if (num_bits > 160) {
       // Accept the invalid size.
-      spare = bs.ToUnsignedInt(160, 8);
+      spare = bs.ToUnsignedInt(160, num_bits - 160);
     }
     break;
   case 1:  // Part B
-    if (num_bits == 160) {
-      // Some devices incorrectly use part 1 as 0.
-      name = bs.ToString(40, 120);
-      part_num = 0;
-      break;
-    }
     type_and_cargo = bs.ToUnsignedInt(40, 8);
     vendor_id = bs.ToString(48, 42);
     callsign = bs.ToString(90, 42);
