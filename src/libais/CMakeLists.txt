@@ -1,6 +1,6 @@
-
 add_library(ais 
 ais.cpp
+ais_bitset.cpp
 ais1_2_3.cpp
 ais4_11.cpp
 ais5.cpp
@@ -30,6 +30,20 @@ ais24.cpp
 ais25.cpp
 ais26.cpp
 ais27.cpp
+decode_body.cpp
+vdm.cpp
+)
+target_include_directories(ais PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+set_target_properties(ais PROPERTIES PUBLIC_HEADER ais.h)
+
+include(GNUInstallDirs)
+
+install(TARGETS ais
+  EXPORT LibaisConfig
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # Not yet handled:

@@ -53,6 +53,8 @@ enum AIS_FI {
   AIS_FI_8_1_31_MET_HYDRO = 31,
   AIS_FI_8_1_40_PERSONS_ON_BOARD = 40,
   AIS_FI_8_200_10_RIS_SHIP_AND_VOYAGE = 10,
+  AIS_FI_8_200_21_RIS_ETA_AT_LOCK_BRIDGE_TERMINAL = 21,
+  AIS_FI_8_200_22_RIS_RTA_AT_LOCK_BRIDGE_TERMINAL = 22,
   AIS_FI_8_200_23_RIS_EMMA_WARNING = 23,
   AIS_FI_8_200_24_RIS_WATERLEVEL = 24,
   AIS_FI_8_200_40_RIS_ATON_SIGNAL_STATUS = 40,
@@ -74,6 +76,17 @@ DictSafeSetItem(PyObject *dict, const string &key, const long val) {  // NOLINT
 
 void
 DictSafeSetItem(PyObject *dict, const string &key, const int val) {
+  PyObject *key_obj = PyUnicode_FromString(key.c_str());
+  PyObject *val_obj = PyLong_FromLong(val);
+  assert(key_obj);
+  assert(val_obj);
+  PyDict_SetItem(dict, key_obj, val_obj);
+  Py_DECREF(key_obj);
+  Py_DECREF(val_obj);
+}
+
+void
+DictSafeSetItem(PyObject *dict, const string &key, const unsigned int val) {
   PyObject *key_obj = PyUnicode_FromString(key.c_str());
   PyObject *val_obj = PyLong_FromLong(val);
   assert(key_obj);
@@ -402,6 +415,8 @@ ais6_1_3_append_pydict(const char *nmea_payload, PyObject *dict,
 
   DictSafeSetItem(dict, "req_dac", msg.req_dac);
   DictSafeSetItem(dict, "spare2", msg.spare2);
+  DictSafeSetItem(dict, "spare3", msg.spare3);
+  DictSafeSetItem(dict, "spare4", msg.spare4);
 
   return AIS_OK;
 }
@@ -418,9 +433,10 @@ ais6_1_4_append_pydict(const char *nmea_payload, PyObject *dict,
   }
 
   DictSafeSetItem(dict, "ack_dac", msg.ack_dac);
-  PyObject *cap_list = PyList_New(26);
-  PyObject *res_list = PyList_New(26);
-  for (size_t cap_num = 0; cap_num < 128/2; cap_num++) {
+  constexpr int kNumFI = 64;
+  PyObject *cap_list = PyList_New(kNumFI);
+  PyObject *res_list = PyList_New(kNumFI);
+  for (size_t cap_num = 0; cap_num < kNumFI; cap_num++) {
     // TODO(schwehr): memory leak?
     PyObject *cap = PyLong_FromLong(long(msg.capabilities[cap_num]));  // NOLINT
     PyList_SetItem(cap_list, cap_num, cap);
@@ -431,6 +447,9 @@ ais6_1_4_append_pydict(const char *nmea_payload, PyObject *dict,
   DictSafeSetItem(dict, "capabilities", cap_list);
   DictSafeSetItem(dict, "cap_reserved", res_list);
   DictSafeSetItem(dict, "spare2", msg.spare2);
+  DictSafeSetItem(dict, "spare3", msg.spare2);
+  DictSafeSetItem(dict, "spare4", msg.spare2);
+  DictSafeSetItem(dict, "spare5", msg.spare2);
 
   return AIS_OK;
 }
@@ -1641,6 +1660,7 @@ ais8_1_31_append_pydict(const char *nmea_payload, PyObject *dict,
 // no 32 broadcast
 
 // DAC 200 - River Information System
+// Inland ship static and voyage related data
 AIS_STATUS
 ais8_200_10_append_pydict(const char *nmea_payload, PyObject *dict,
                           const size_t pad) {
@@ -1667,8 +1687,65 @@ ais8_200_10_append_pydict(const char *nmea_payload, PyObject *dict,
   return AIS_OK;
 }
 
+// River Information System
+// ETA report
+AIS_STATUS
+ais8_200_21_append_pydict(const char *nmea_payload, PyObject *dict,
+                          const size_t pad) {
+  assert(nmea_payload);
+  assert(dict);
+  assert(pad < 6);
+  Ais8_200_21 msg(nmea_payload, pad);
+  if (msg.had_error()) {
+    return msg.get_error();
+  }
+
+  DictSafeSetItem(dict, "country", msg.country);
+  DictSafeSetItem(dict, "location", msg.location);
+  DictSafeSetItem(dict, "section", msg.section);
+  DictSafeSetItem(dict, "terminal", msg.terminal);
+  DictSafeSetItem(dict, "hectometre", msg.hectometre);
+  DictSafeSetItem(dict, "eta_month", msg.eta_month);
+  DictSafeSetItem(dict, "eta_day", msg.eta_day);
+  DictSafeSetItem(dict, "eta_hour", msg.eta_hour);
+  DictSafeSetItem(dict, "eta_minute", msg.eta_minute);
+  DictSafeSetItem(dict, "tugboats", msg.tugboats);
+  DictSafeSetItem(dict, "air_draught", msg.air_draught);
+  DictSafeSetItem(dict, "spare2", msg.spare2);
+
+  return AIS_OK;
+}
 
 // River Information System
+// RTA report
+AIS_STATUS
+ais8_200_22_append_pydict(const char *nmea_payload, PyObject *dict,
+                          const size_t pad) {
+  assert(nmea_payload);
+  assert(dict);
+  assert(pad < 6);
+  Ais8_200_22 msg(nmea_payload, pad);
+  if (msg.had_error()) {
+    return msg.get_error();
+  }
+
+  DictSafeSetItem(dict, "country", msg.country);
+  DictSafeSetItem(dict, "location", msg.location);
+  DictSafeSetItem(dict, "section", msg.section);
+  DictSafeSetItem(dict, "terminal", msg.terminal);
+  DictSafeSetItem(dict, "hectometre", msg.hectometre);
+  DictSafeSetItem(dict, "rta_month", msg.rta_month);
+  DictSafeSetItem(dict, "rta_day", msg.rta_day);
+  DictSafeSetItem(dict, "rta_hour", msg.rta_hour);
+  DictSafeSetItem(dict, "rta_minute", msg.rta_minute);
+  DictSafeSetItem(dict, "lock_status", msg.lock_status);
+  DictSafeSetItem(dict, "spare2", msg.spare2);
+
+  return AIS_OK;
+}
+
+// River Information System
+// EMMA warning
 AIS_STATUS
 ais8_200_23_append_pydict(const char *nmea_payload, PyObject *dict,
                           const size_t pad) {
@@ -1703,7 +1780,8 @@ ais8_200_23_append_pydict(const char *nmea_payload, PyObject *dict,
 }
 
 
-// River Information System
+// EU River Information System (RIS)
+// Water level
 AIS_STATUS
 ais8_200_24_append_pydict(const char *nmea_payload, PyObject *dict,
                           const size_t pad) {
@@ -1719,12 +1797,12 @@ ais8_200_24_append_pydict(const char *nmea_payload, PyObject *dict,
 
   PyObject *id_list = PyList_New(4);
   for (size_t i = 0; i < 4; i++)
-    PyList_SetItem(id_list, 0, PyLong_FromLong(msg.gauge_ids[i]));
+    PyList_SetItem(id_list, i, PyLong_FromLong(msg.gauge_ids[i]));
   DictSafeSetItem(dict, "gauge_ids", id_list);
 
   PyObject *level_list = PyList_New(4);
   for (size_t i = 0; i < 4; i++)
-    PyList_SetItem(level_list, 0, PyFloat_FromDouble(msg.levels[i]));
+    PyList_SetItem(level_list, i, PyFloat_FromDouble(msg.levels[i]));
   DictSafeSetItem(dict, "levels", level_list);
 
   return AIS_OK;
@@ -1732,6 +1810,7 @@ ais8_200_24_append_pydict(const char *nmea_payload, PyObject *dict,
 
 
 // River Information System
+// Signal status
 AIS_STATUS
 ais8_200_40_append_pydict(const char *nmea_payload, PyObject *dict,
                           const size_t pad) {
@@ -1756,6 +1835,7 @@ ais8_200_40_append_pydict(const char *nmea_payload, PyObject *dict,
 
 
 // River Information System
+// Number of persons on board
 AIS_STATUS
 ais8_200_55_append_pydict(const char *nmea_payload, PyObject *dict,
                           const size_t pad) {
@@ -1997,8 +2077,12 @@ ais8_to_pydict(const char *nmea_payload, const size_t pad) {
     case AIS_FI_8_200_10_RIS_SHIP_AND_VOYAGE:
       status = ais8_200_10_append_pydict(nmea_payload, dict, pad);
       break;
-      // 21: Addressed only
-      // 22: Addressed only
+    case AIS_FI_8_200_21_RIS_ETA_AT_LOCK_BRIDGE_TERMINAL:
+      status = ais8_200_21_append_pydict(nmea_payload, dict, pad);
+      break;
+    case AIS_FI_8_200_22_RIS_RTA_AT_LOCK_BRIDGE_TERMINAL:
+      status = ais8_200_22_append_pydict(nmea_payload, dict, pad);
+      break;
     case AIS_FI_8_200_23_RIS_EMMA_WARNING:
       status = ais8_200_23_append_pydict(nmea_payload, dict, pad);
       break;
@@ -2764,8 +2848,6 @@ static PyMethodDef ais_methods[] = {
 
 // Python module initialization
 
-#if PY_MAJOR_VERSION >= 3
-
 static struct PyModuleDef aismodule = {
   PyModuleDef_HEAD_INIT,
   "_ais",  // Module name.
@@ -2785,23 +2867,6 @@ PyMODINIT_FUNC PyInit__ais(void) {
   PyModule_AddObject(module, exception_short, ais_py_exception);
   return module;
 }
-
-#else  // Python 2.7
-
-void init_ais(void) {
-  PyObject *module = Py_InitModule("_ais", ais_methods);
-
-  if (module == nullptr) {
-    return;
-  }
-
-  ais_py_exception = PyErr_NewException(
-      const_cast<char *>(exception_name), nullptr, nullptr);
-  Py_INCREF(ais_py_exception);
-  PyModule_AddObject(module, exception_short, ais_py_exception);
-}
-
-#endif  // PY_MAJOR_VERSION
 
 }  // extern "C"
 

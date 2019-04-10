@@ -145,6 +145,79 @@ top_level = [
              'text': '<OSAKA HARBOUR R42>INFORMATION: WIND W 4M/S AT OSAKA HARBOUR RADAR(34-39-12N 135-25-50E) 10:25JST.'}
   },
 
+    {
+        'nmea': ['!AIVDM,1,1,,A,63m95T8uBK:0044@00P,2*7A'],
+        'result': {
+            'id': 6,
+            'repeat_indicator': 0,
+            'mmsi': 257050000,
+            'seq': 2,
+            'mmsi_dest': 257060000,
+            'retransmit': True,
+            'spare': 0,
+            'dac': 1,
+            'fi': 1,
+            'ack_dac': 64,
+            'msg_seq': 1,
+            'spare2': 0}},
+    {
+        'nmea': ['!AIVDM,1,1,,B,65@<;:1inW@h0480J0,4*60'],
+        'result': {
+            'id': 6,
+            'repeat_indicator': 0,
+            'mmsi': 352521000,
+            'seq': 0,
+            'mmsi_dest': 477535500,
+            'retransmit': True,
+            'spare': 0,
+            'dac': 1,
+            'fi': 2,
+            'req_dac': 1,
+            'req_fi': 40}},
+    {
+        'nmea': ['!AIVDM,1,1,,A,601uEQ8i02s:04<0@00000000000,0*12'],
+        'result': {
+            'dac': 1,
+            'fi': 3,
+            'id': 6,
+            'mmsi': 2053508,
+            'mmsi_dest': 205523890,
+            'repeat_indicator': 0,
+            'req_dac': 1,
+            'retransmit': False,
+            'seq': 2,
+            'spare': 0,
+            'spare2': 0,
+            'spare3': 0,
+            'spare4': 0}},
+    {
+        'nmea': ['!AIVDM,1,1,,A,633krv00OEGl04@0Hb000200000000000000000000'
+                 '00000000000000000,2*30'],
+        'result': {
+            'ack_dac': 1,
+            'capabilities': [
+                1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0],
+            'cap_reserved': [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0],
+            'dac': 1,
+            'fi': 4,
+            'id': 6,
+            'mmsi': 205323000,
+            'mmsi_dest': 2053501,
+            'repeat_indicator': 0,
+            'retransmit': True,
+            'seq': 0,
+            'spare': 0,
+            'spare2': 0,
+            'spare3': 0,
+            'spare4': 0,
+            'spare5': 0}},
   {
     'nmea': [ '!AIVDM,1,1,,B,7l9B8LhP00PDLCvMdkg00?vD2D7w,0*3A,raishub,1342574351' ],
     'result': {'acks': [(134218245, 0),
@@ -199,6 +272,22 @@ top_level = [
              'x': 126.58676666666666,
              'y': 37.43836666666667}
   },
+
+    {
+        # 8:200:24 EU River Information System (RIS) Water level
+        # https://github.com/schwehr/libais/issues/162
+        'nmea': ['!AIVDM,1,1,,A,801tME0j60E04QJp1hhL10G20DH1,0*11'],
+        'result': {
+            'id': 8,
+            'repeat_indicator': 0,
+            'mmsi': 2039124,
+            'spare': 0,
+            'dac': 200,
+            'fi': 24,
+            'country': 'AT',
+            'gauge_ids': [9, 7, 8, 5],
+            'levels': [4294966528.0, 4294966528.0, 4294966528.0, 4294965760.0]}
+    },
 
   {
     'nmea': [ '!AIVDM,1,1,,B,9oVAuAI5;rRRv2OqTi?1uoP?=a@1,0*74,raishub,1342572824' ],
